@@ -1,40 +1,1651 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Anti V4 Loader</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: "Segoe UI", Roboto, Arial, sans-serif;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anti-V4 – The future of script execution</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon fill='%230070f3' points='50,0 100,100 0,100'/></svg>">
+    <style>
+        :root {
+            --geist-foreground: #000;
+            --geist-background: #fff;
+            --accents-1: #fafafa;
+            --accents-2: #eaeaea;
+            --accents-3: #999;
+            --accents-4: #888;
+            --accents-5: #666;
+            --accents-6: #444;
+            --accents-7: #333;
+            --accents-8: #111;
+            --geist-success: #0070f3;
+            --geist-error: #ee0000;
+            --geist-warning: #f5a623;
+            --geist-violet: #7928ca;
+            --geist-cyan: #50e3c2;
+            --geist-pink: #f81ce5;
+            --radius: 8px;
+            --shadow-smallest: 0px 2px 4px rgba(0, 0, 0, 0.1);
+            --shadow-small: 0 5px 10px rgba(0, 0, 0, 0.12);
+            --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --shadow-large: 0 30px 60px rgba(0, 0, 0, 0.12);
+            --shadow-hover: 0 40px 80px rgba(0, 0, 0, 0.12);
+        }
 
-    body {
-      background: linear-gradient(135deg, #000 0%, #0a0a0a 100%);
-      color: #fff;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+        [data-theme="dark"] {
+            --geist-foreground: #fff;
+            --geist-background: #000;
+            --accents-1: #111;
+            --accents-2: #333;
+            --accents-3: #444;
+            --accents-4: #666;
+            --accents-5: #888;
+            --accents-6: #999;
+            --accents-7: #eaeaea;
+            --accents-8: #fafafa;
+            --shadow-smallest: 0px 2px 4px rgba(0, 0, 0, 0.4);
+            --shadow-small: 0 5px 10px rgba(0, 0, 0, 0.3);
+            --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.3);
+            --shadow-large: 0 30px 60px rgba(0, 0, 0, 0.4);
+            --shadow-hover: 0 40px 80px rgba(0, 0, 0, 0.5);
+        }
 
-    header {
-      text-align: center;
-      padding: 70px 20px 30px;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    h1 {
-      font-size: 3rem;
-      font-weight: 800;
-      background: linear-gradient(90deg, #00ff88, #00bfff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+        html {
+            scroll-behavior: smooth;
+            font-feature-settings: 'rlig' 1, 'calt' 1;
+        }
 
-    p {
+        body {
+            font-family: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+            background: var(--geist-background);
+            color: var(--geist-foreground);
+            line-height: 1.6;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Gradient Background */
+        .gradient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.4;
+            background: radial-gradient(circle at 25% 25%, #0070f3 0%, transparent 50%), 
+                        radial-gradient(circle at 75% 75%, #7928ca 0%, transparent 50%),
+                        radial-gradient(circle at 50% 50%, #50e3c2 0%, transparent 50%);
+            animation: gradientShift 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            33% { transform: scale(1.1) rotate(120deg); }
+            66% { transform: scale(0.9) rotate(240deg); }
+        }
+
+        [data-theme="dark"] .gradient-bg {
+            opacity: 0.15;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--accents-2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] .header {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 80px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 20px;
+            text-decoration: none;
+            color: var(--geist-foreground);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-triangle {
+            width: 28px;
+            height: 28px;
+            margin-right: 12px;
+            background: linear-gradient(135deg, #0070f3 0%, #7928ca 50%, #50e3c2 100%);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-triangle::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .logo:hover .logo-triangle {
+            transform: rotate(180deg) scale(1.1);
+        }
+
+        .logo:hover .logo-triangle::before {
+            left: 100%;
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-link {
+            color: var(--accents-5);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            padding: 8px 0;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #0070f3, #7928ca);
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-link:hover {
+            color: var(--geist-foreground);
+            transform: translateY(-2px);
+        }
+
+        .nav-link:hover::before {
+            width: 100%;
+        }
+
+        .theme-toggle {
+            background: var(--accents-1);
+            border: 1px solid var(--accents-2);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 18px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, var(--geist-success) 0%, transparent 70%);
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translate(-50%, -50%);
+            opacity: 0;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(180deg);
+            border-color: var(--geist-success);
+            box-shadow: 0 0 20px rgba(0, 112, 243, 0.3);
+        }
+
+        .theme-toggle:hover::before {
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 200px 0 150px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg at 50% 50%, 
+                transparent 0deg, 
+                rgba(0, 112, 243, 0.03) 60deg, 
+                transparent 120deg, 
+                rgba(121, 40, 202, 0.03) 180deg, 
+                transparent 240deg, 
+                rgba(80, 227, 194, 0.03) 300deg, 
+                transparent 360deg);
+            animation: rotate 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-announcement {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, rgba(0, 112, 243, 0.1), rgba(121, 40, 202, 0.1));
+            border: 1px solid rgba(0, 112, 243, 0.2);
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--geist-success);
+            margin-bottom: 40px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-announcement::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .hero-announcement:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: var(--shadow-medium);
+            border-color: rgba(0, 112, 243, 0.4);
+        }
+
+        .hero-announcement:hover::before {
+            left: 100%;
+        }
+
+        .hero-announcement-dot {
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(45deg, #00ff88, #00d4aa);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1); 
+                box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+            }
+            50% { 
+                transform: scale(1.2); 
+                box-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+            }
+        }
+
+        .hero-title {
+            font-size: clamp(48px, 10vw, 120px);
+            font-weight: 800;
+            letter-spacing: -0.06em;
+            margin-bottom: 32px;
+            background: linear-gradient(135deg, 
+                var(--geist-foreground) 0%, 
+                var(--geist-foreground) 30%, 
+                var(--geist-success) 60%, 
+                var(--geist-violet) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 0.9;
+            position: relative;
+        }
+
+        .hero-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--geist-success), transparent);
+            border-radius: 2px;
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { opacity: 0.3; transform: translateX(-50%) scaleX(1); }
+            50% { opacity: 1; transform: translateX(-50%) scaleX(1.5); }
+        }
+
+        .hero-subtitle {
+            font-size: 24px;
+            color: var(--accents-5);
+            max-width: 700px;
+            margin: 0 auto 56px;
+            font-weight: 400;
+            line-height: 1.4;
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 80px;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            flex-wrap: wrap;
+            padding: 32px;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--accents-2);
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+        }
+
+        [data-theme="dark"] .hero-stats {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--geist-success);
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, var(--geist-success), var(--geist-violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-stat-label {
+            font-size: 14px;
+            color: var(--accents-5);
+            font-weight: 500;
+        }
+
+        /* Enhanced Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 32px;
+            height: 56px;
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            cursor: pointer;
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0070f3 0%, #7928ca 100%);
+            color: white;
+            box-shadow: 0 8px 32px rgba(0, 112, 243, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(0, 112, 243, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--geist-background);
+            color: var(--geist-foreground);
+            border: 2px solid var(--accents-2);
+            box-shadow: var(--shadow-small);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--geist-success);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .btn-ghost {
+            background: rgba(0, 112, 243, 0.1);
+            color: var(--geist-success);
+            border: 2px solid rgba(0, 112, 243, 0.2);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(0, 112, 243, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(0, 112, 243, 0.2);
+        }
+
+        .btn-icon {
+            margin-left: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .btn:hover .btn-icon {
+            transform: translateX(4px);
+        }
+
+        /* Floating Elements */
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .floating-element {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(0, 112, 243, 0.1), rgba(121, 40, 202, 0.1));
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-element:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            width: 80px;
+            height: 80px;
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            top: 60%;
+            right: 15%;
+            width: 120px;
+            height: 120px;
+            animation-delay: 2s;
+        }
+
+        .floating-element:nth-child(3) {
+            bottom: 30%;
+            left: 20%;
+            width: 60px;
+            height: 60px;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(90deg); }
+            50% { transform: translateY(0) rotate(180deg); }
+            75% { transform: translateY(20px) rotate(270deg); }
+        }
+
+        /* Section Styling */
+        .section {
+            padding: 160px 0;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 100px;
+        }
+
+        .section-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(0, 112, 243, 0.1), rgba(121, 40, 202, 0.1));
+            color: var(--geist-success);
+            border: 1px solid rgba(0, 112, 243, 0.3);
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .section-badge:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 112, 243, 0.2);
+        }
+
+        .section-title {
+            font-size: clamp(36px, 6vw, 64px);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, var(--geist-foreground) 0%, var(--geist-success) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-subtitle {
+            font-size: 20px;
+            color: var(--accents-5);
+            max-width: 680px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        /* Enhanced Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid var(--accents-2);
+            border-radius: 16px;
+            padding: 40px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-small);
+        }
+
+        [data-theme="dark"] .card {
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--geist-success), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: var(--shadow-hover);
+            border-color: rgba(0, 112, 243, 0.4);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            margin-right: 16px;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(0, 112, 243, 0.1), rgba(121, 40, 202, 0.1));
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover .card-icon {
+            transform: scale(1.1) rotate(5deg);
+            background: linear-gradient(135deg, rgba(0, 112, 243, 0.2), rgba(121, 40, 202, 0.2));
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .card-description {
+            color: var(--accents-5);
+            margin-bottom: 32px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        /* Premium Code Block */
+        .code-container {
+            margin: 32px 0;
+        }
+
+        .code-block {
+            background: var(--accents-1);
+            border: 1px solid var(--accents-2);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow-medium);
+            transition: all 0.3s ease;
+        }
+
+        .code-block:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-large);
+        }
+
+        .code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, var(--geist-background), var(--accents-1));
+            border-bottom: 1px solid var(--accents-2);
+        }
+
+        .code-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accents-6);
+        }
+
+        .code-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .code-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .code-dot:nth-child(1) { background: #ff5f57; }
+        .code-dot:nth-child(2) { background: #ffbd2e; }
+        .code-dot:nth-child(3) { background: #28ca42; }
+
+        .code-block:hover .code-dot {
+            transform: scale(1.2);
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .code-content {
+            padding: 24px;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            position: relative;
+            background: linear-gradient(135deg, var(--accents-1) 0%, rgba(0, 112, 243, 0.02) 100%);
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--accents-2);
+            border: 1px solid var(--accents-3);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--accents-6);
+            z-index: 10;
+        }
+
+        .copy-btn:hover {
+            background: var(--geist-success);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(0, 112, 243, 0.3);
+        }
+
+        .copy-btn.copied {
+            background: #28ca42;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* Grid Layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 32px;
+            margin-top: 60px;
+        }
+
+        /* Key System Cards */
+        .key-card {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--accents-2);
+            border-radius: 20px;
+            padding: 32px;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-small);
+        }
+
+        [data-theme="dark"] .key-card {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .key-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #0070f3, #7928ca, #50e3c2, #f81ce5);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .key-card:hover {
+            transform: translateY(-16px) scale(1.03);
+            box-shadow: var(--shadow-hover);
+            border-color: rgba(0, 112, 243, 0.5);
+        }
+
+        .key-card:hover::after {
+            opacity: 1;
+        }
+
+        .key-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #0070f3, #7928ca);
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 24px;
+                        box-shadow: 0 10px 30px rgba(0, 112, 243, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .key-card:hover .key-number {
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 15px 40px rgba(0, 112, 243, 0.5);
+        }
+
+        .key-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--geist-foreground), var(--geist-success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .key-description {
+            color: var(--accents-5);
+            margin-bottom: 24px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .status-working {
+            background: linear-gradient(135deg, rgba(40, 202, 66, 0.1), rgba(0, 112, 243, 0.1));
+            color: #28ca42;
+            border: 1px solid rgba(40, 202, 66, 0.3);
+        }
+
+        .status-testing {
+            background: linear-gradient(135deg, rgba(255, 189, 46, 0.1), rgba(121, 40, 202, 0.1));
+            color: #ffbd2e;
+            border: 1px solid rgba(255, 189, 46, 0.3);
+        }
+
+        .key-steps {
+            background: var(--accents-1);
+            border: 1px solid var(--accents-2);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 24px;
+            text-align: left;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .key-steps.active {
+            opacity: 1;
+            max-height: 500px;
+        }
+
+        .key-steps h4 {
+            margin-bottom: 16px;
+            color: var(--geist-foreground);
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .key-steps ol {
+            padding-left: 24px;
+            margin-bottom: 20px;
+        }
+
+        .key-steps li {
+            margin-bottom: 12px;
+            color: var(--accents-5);
+            line-height: 1.6;
+        }
+
+        /* Feature Cards */
+        .feature {
+            text-align: center;
+            padding: 40px 32px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid var(--accents-2);
+            border-radius: 16px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-small);
+            backdrop-filter: blur(20px);
+        }
+
+        [data-theme="dark"] .feature {
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .feature:hover {
+            transform: translateY(-12px) scale(1.03);
+            box-shadow: var(--shadow-hover);
+            border-color: rgba(0, 112, 243, 0.4);
+        }
+
+        .feature-icon {
+            font-size: 56px;
+            margin-bottom: 24px;
+            display: inline-block;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(135deg, #0070f3, #7928ca);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .feature:hover .feature-icon {
+            transform: scale(1.2) rotate(10deg);
+            filter: drop-shadow(0 10px 20px rgba(0, 112, 243, 0.3));
+        }
+
+        .feature-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--geist-foreground);
+        }
+
+        .feature-description {
+            color: var(--accents-5);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* Premium Alert */
+        .alert {
+            background: linear-gradient(135deg, rgba(245, 166, 35, 0.1), rgba(121, 40, 202, 0.1));
+            border: 1px solid rgba(245, 166, 35, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 32px 0;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .alert:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(245, 166, 35, 0.2);
+        }
+
+        .alert-icon {
+            font-size: 24px;
+            color: #f5a623;
+            min-width: 40px;
+        }
+
+        .alert-text {
+            color: var(--accents-6);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .alert-text strong {
+            color: var(--geist-foreground);
+        }
+
+        /* Footer */
+        .footer {
+            border-top: 1px solid var(--accents-2);
+            padding: 120px 0 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 112, 243, 0.03), rgba(121, 40, 202, 0.03));
+            pointer-events: none;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 60px;
+            margin-bottom: 60px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer-section h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--geist-foreground);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section li {
+            margin-bottom: 16px;
+        }
+
+        .footer-section a {
+            color: var(--accents-5);
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .footer-section a:hover {
+            color: var(--geist-success);
+            transform: translateX(4px);
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 40px;
+            border-top: 1px solid var(--accents-2);
+            color: var(--accents-5);
+            font-size: 14px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 18px;
+            text-decoration: none;
+            color: var(--geist-foreground);
+        }
+
+        .footer-logo-triangle {
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            background: linear-gradient(135deg, #0070f3, #7928ca);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .footer-links a {
+            color: var(--accents-5);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--geist-success);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero {
+                padding: 180px 0 120px;
+            }
+            
+            .section {
+                padding: 120px 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 20px;
+            }
+            
+            .header-content {
+                height: 72px;
+            }
+            
+            .nav {
+                gap: 20px;
+            }
+            
+            .hero-title {
+                font-size: clamp(40px, 10vw, 80px);
+            }
+            
+            .hero-subtitle {
+                font-size: 20px;
+            }
+            
+            .hero-actions {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 16px;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+                gap: 40px;
+            }
+            
+            .footer-bottom {
+                flex-direction: column;
+                gap: 24px;
+                text-align: center;
+            }
+            
+            .footer-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav {
+                gap: 16px;
+            }
+            
+            .hero {
+                padding: 160px 0 100px;
+            }
+            
+            .hero-announcement {
+                font-size: 12px;
+                padding: 6px 16px;
+            }
+            
+            .hero-stats {
+                flex-direction: column;
+                gap: 24px;
+            }
+            
+            .section-badge {
+                font-size: 12px;
+                padding: 6px 16px;
+            }
+            
+            .section-title {
+                font-size: 32px;
+            }
+            
+            .section-subtitle {
+                font-size: 18px;
+            }
+            
+            .card {
+                padding: 32px 24px;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .animate-in {
+            opacity: 0;
+            animation: slideInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .animate-fade {
+            opacity: 0;
+            animation: fadeIn 1s ease forwards;
+        }
+
+        .animate-delay-1 { animation-delay: 0.1s; }
+        .animate-delay-2 { animation-delay: 0.2s; }
+        .animate-delay-3 { animation-delay: 0.3s; }
+        .animate-delay-4 { animation-delay: 0.4s; }
+        .animate-delay-5 { animation-delay: 0.5s; }
+    </style>
+</head>
+<body data-theme="dark">
+    <div class="gradient-bg"></div>
+    
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="#" class="logo">
+                    <div class="logo-triangle"></div>
+                    Anti-V4
+                </a>
+                <nav class="nav">
+                    <a href="#features" class="nav-link">Features</a>
+                    <a href="#loader" class="nav-link">Loader</a>
+                    <a href="#keys" class="nav-link">Keys</a>
+                    <a href="#docs" class="nav-link">Docs</a>
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <span id="theme-icon">☀️</span>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="floating-elements">
+                <div class="floating-element"></div>
+                <div class="floating-element"></div>
+                <div class="floating-element"></div>
+            </div>
+            
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-announcement animate-in">
+                        <div class="hero-announcement-dot"></div>
+                        Version 4.2.0 Released — New detection evasion techniques
+                    </div>
+                    
+                    <h1 class="hero-title animate-in animate-delay-1">Anti-V4</h1>
+                    <p class="hero-subtitle animate-in animate-delay-2">
+                        The most advanced script loader with military-grade security, real-time environment analysis, 
+                        and dynamic code randomization to bypass modern detection systems.
+                    </p>
+                    
+                    <div class="hero-actions animate-in animate-delay-3">
+                        <a href="#loader" class="btn btn-primary">
+                            Get Started
+                            <span class="btn-icon">→</span>
+                        </a>
+                        <a href="#features" class="btn btn-secondary">
+                            Explore Features
+                        </a>
+                        <a href="#" class="btn btn-ghost">
+                            View Documentation
+                        </a>
+                    </div>
+                    
+                    <div class="hero-stats animate-in animate-delay-4">
+                        <div class="hero-stat">
+                            <div class="hero-stat-number">12,847</div>
+                            <div class="hero-stat-label">Daily Executions</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="hero-stat-number">99.97%</div>
+                            <div class="hero-stat-label">Success Rate</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="hero-stat-number">4.2ms</div>
+                            <div class="hero-stat-label">Avg. Load Time</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="section">
+            <div class="container">
+                <div class="section-header animate-in">
+                    <div class="section-badge">✨ PREMIUM FEATURES</div>
+                    <h2 class="section-title">Next-Generation Protection</h2>
+                    <p class="section-subtitle">
+                        Anti-V4 combines multiple cutting-edge techniques to ensure your scripts remain undetected 
+                        while maintaining peak performance.
+                    </p>
+                </div>
+                
+                <div class="grid-3">
+                    <div class="feature animate-in">
+                        <div class="feature-icon">🔍</div>
+                        <h3 class="feature-title">Environment Analysis</h3>
+                        <p class="feature-description">
+                            Real-time scanning of execution context with adaptive behavior to match legitimate traffic patterns.
+                        </p>
+                    </div>
+                    
+                    <div class="feature animate-in animate-delay-1">
+                        <div class="feature-icon">🛡️</div>
+                        <h3 class="feature-title">Memory Obfuscation</h3>
+                        <p class="feature-description">
+                            Dynamic memory manipulation with polymorphic encryption to prevent signature scanning.
+                        </p>
+                    </div>
+                    
+                    <div class="feature animate-in animate-delay-2">
+                        <div class="feature-icon">🌀</div>
+                        <h3 class="feature-title">Code Randomization</h3>
+                        <p class="feature-description">
+                            Unique code structure generation for each execution to prevent pattern recognition.
+                        </p>
+                    </div>
+                    
+                    <div class="feature animate-in">
+                        <div class="feature-icon">⚡</div>
+                        <h3 class="feature-title">Performance Optimized</h3>
+                        <p class="feature-description">
+                            JIT compilation with near-native execution speeds and minimal overhead.
+                        </p>
+                    </div>
+                    
+                    <div class="feature animate-in animate-delay-1">
+                        <div class="feature-icon">🔒</div>
+                        <h3 class="feature-title">Secure Authentication</h3>
+                        <p class="feature-description">
+                            AES-256 encrypted key validation with hardware fingerprinting.
+                        </p>
+                    </div>
+                    
+                    <div class="feature animate-in animate-delay-2">
+                        <div class="feature-icon">🔄</div>
+                        <h3 class="feature-title">Auto-Updating</h3>
+                        <p class="feature-description">
+                            Silent background updates with zero downtime when new versions release.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="loader" class="section">
+            <div class="container">
+                <div class="section-header animate-in">
+                    <div class="section-badge">🚀 INSTANT DEPLOYMENT</div>
+                    <h2 class="section-title">Script Loader</h2>
+                    <p class="section-subtitle">
+                        Execute the loader script below to initialize the Anti-V4 system with automatic environment 
+                        detection and configuration.
+                    </p>
+                </div>
+                
+                <div class="card animate-in">
+                    <div class="card-header">
+                        <div class="card-icon">⚡</div>
+                        <h3 class="card-title">Main Loadstring</h3>
+                    </div>
+                    <p class="card-description">
+                        This is the primary loader that handles authentication, environment checks, and script injection. 
+                        The system will automatically download and execute the latest secure version.
+                    </p>
+                    
+                    <div class="code-container">
+                        <div class="code-block">
+                            <div class="code-header">
+                                <div class="code-title">
+                                    <div class="code-dots">
+                                        <div class="code-dot"></div>
+                                        <div class="code-dot"></div>
+                                        <div class="code-dot"></div>
+                                    </div>
+                                    anti-v4-loader.lua
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <div class="copy-btn" onclick="copyCode('main-script')">Copy</div>
+                                <code id="main-script">loadstring(game:HttpGet('https://raw.githubusercontent.com/Flanchyowo/AV3/refs/heads/main/AV3LOADER', true))()</code>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert animate-in animate-delay-1">
+                        <div class="alert-icon">⚠️</div>
+                        <div class="alert-text">
+                            <strong>Important:</strong> First-time execution requires authentication. You'll be prompted to 
+                            enter your key or complete verification. See the <a href="#keys" style="color: var(--geist-success);">Key System</a> 
+                            section for details.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="keys" class="section">
+            <div class="container">
+                <div class="section-header animate-in">
+                    <div class="section-badge">🔐 SECURE AUTHENTICATION</div>
+                    <h2 class="section-title">Key System</h2>
+                    <p class="section-subtitle">
+                        Choose your preferred authentication method. All keys provide full access to the Anti-V4 system 
+                        with enterprise-grade security.
+                    </p>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="key-card animate-in">
+                        <div class="key-number">1</div>
+                        <h3 class="key-title">Linkvertise Verification</h3>
+                        <p class="key-description">
+                            Complete a simple Linkvertise verification to get a temporary 24-hour key. Perfect for testing 
+                            the system before purchase.
+                        </p>
+                        <div class="status-badge status-working">Active</div>
+                        <button class="btn btn-secondary" onclick="toggleSteps('linkvertise')">
+                            Get Free Key
+                        </button>
+                        
+                        <div id="linkvertise-steps" class="key-steps">
+                            <h4>How to get your free key:</h4>
+                            <ol>
+                                <li>Click the "Get Free Key" button above</li>
+                                <li>Complete the Linkvertise verification steps</li>
+                                <li>Copy your unique 24-hour access key</li>
+                                <li>Paste it when prompted by the loader</li>
+                                <li>Enjoy full access for 24 hours</li>
+                            </ol>
+                            <a href="#" class="btn btn-primary" style="width: 100%; margin-top: 16px;">
+                                Start Verification
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="key-card animate-in animate-delay-1">
+                        <div class="key-number">2</div>
+                        <h3 class="key-title">Premium Purchase</h3>
+                        <p class="key-description">
+                            Purchase a permanent key for unlimited access with priority support, faster updates, and 
+                            exclusive features.
+                        </p>
+                        <div class="status-badge status-working">Active</div>
+                        <button class="btn btn-secondary" onclick="toggleSteps('premium')">
+                            Purchase Options
+                        </button>
+                        
+                        <div id="premium-steps" class="key-steps">
+                            <h4>Premium Key Options:</h4>
+                            <ol>
+                                <li><strong>Weekly:</strong> $9.99 - Full access for 7 days</li>
+                                <li><strong>Monthly:</strong> $24.99 - 30 days of premium features</li>
+                                <li><strong>Lifetime:</strong> $79.99 - Permanent access with all updates</li>
+                            </ol>
+                            <a href="#" class="btn btn-primary" style="width: 100%; margin-top: 16px;">
+                                Buy Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+       
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <a href="#" class="footer-logo">
+                        <div class="footer-logo-triangle"></div>
+                        Anti-V4
+                    </a>
+                    <p style="color: var(--accents-5); margin-top: 20px; line-height: 1.6;">
+                        The most advanced script loader with military-grade security and real-time environment analysis.
+                    </p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Product</h3>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#loader">Loader</a></li>
+                        <li><a href="#keys">Key System</a></li>
+                        <li><a href="#docs">Documentation</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#">GitHub</a></li>
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">Changelog</a></li>
+                        <li><a href="#">Status</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Legal</h3>
+                    <ul>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Refund Policy</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div>© 2023 Anti-V4 Project. All rights reserved.</div>
+                <div class="footer-links">
+                    <a href="#">Terms</a>
+                    <a href="#">Privacy</a>
+                    <a href="#">Cookies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Theme toggle functionality
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.setAttribute('data-theme', 'light');
+                themeIcon.textContent = '🌙';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = '☀️';
+            }
+        }
+        
+        // Key steps toggle
+        function toggleSteps(id) {
+            const element = document.getElementById(id + '-steps');
+            element.classList.toggle('active');
+        }
+        
+        // Copy code functionality
+        function copyCode(id) {
+            const code = document.getElementById(id);
+            const range = document.createRange();
+            range.selectNode(code);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            document.execCommand('copy');
+            window.getSelection().removeAllRanges();
+            
+            const button = code.parentElement.querySelector('.copy-btn');
+            button.textContent = 'Copied!';
+            button.classList.add('copied');
+            
+            setTimeout(() => {
+                button.textContent = 'Copy';
+                button.classList.remove('copied');
+            }, 2000);
+        }
+        
+        // Intersection Observer for animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-in');
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+            
+            document.querySelectorAll('.animate-in').forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>    p {
       margin-top: 10px;
       font-size: 1.2rem;
       color: #bbb;
