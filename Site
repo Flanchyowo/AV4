@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anti V4 Script</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      text-align: center;
+    }
+    header {
+      padding: 60px 20px;
+      background: linear-gradient(135deg, #111, #000);
+    }
+    h1 {
+      font-size: 3rem;
+      margin: 0;
+      background: linear-gradient(90deg, #00ff88, #00bfff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p {
+      font-size: 1.2rem;
+      margin-top: 10px;
+      color: #bbb;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 14px 28px;
+      font-size: 1.1rem;
+      background: #00ff88;
+      color: #000;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+    .btn:hover {
+      background: #00bfff;
+      transform: scale(1.05);
+    }
+    footer {
+      margin-top: 60px;
+      padding: 20px;
+      font-size: 0.9rem;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Anti V4 Script</h1>
+    <p>The next level of protection</p>
+    <a class="btn" href="YOUR-SCRIPT-LINK-HERE">Download</a>
+  </header>
+  <footer>
+    © 2025 Anti V4 | Made with ❤️
+  </footer>
+</body>
+</html>
