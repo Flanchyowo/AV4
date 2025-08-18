@@ -1,40 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Anti V4 Loader</title>
   <style>
-    body {
+    * {
       margin: 0;
-      font-family: "Segoe UI", Arial, sans-serif;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    body {
       background: #0a0a0a;
-      color: #eee;
-      line-height: 1.6;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
+
     header {
-      padding: 80px 20px;
+      padding: 80px 20px 40px;
       text-align: center;
-      background: linear-gradient(135deg, #000, #111);
     }
+
     h1 {
       font-size: 3rem;
+      font-weight: 800;
       background: linear-gradient(90deg, #00ff88, #00bfff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin: 0;
     }
-    .loader-box {
-      background: #111;
-      border: 1px solid #222;
-      border-radius: 10px;
+
+    p {
+      margin-top: 10px;
+      font-size: 1.2rem;
+      color: #bbb;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
       padding: 20px;
-      margin: 30px auto;
-      max-width: 800px;
-      text-align: left;
-      box-shadow: 0 0 20px rgba(0,255,136,0.15);
+      flex: 1;
     }
+
+    .card {
+      background: rgba(20, 20, 20, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 25px;
+      margin: 25px 0;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(12px);
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    h2 {
+      color: #00ff88;
+      margin-bottom: 15px;
+    }
+
     code {
+      display: block;
+      padding: 16px;
+      background: #000;
+      border-radius: 10px;
+      color: #0f0;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      overflow-x: auto;
+    }
+
+    .copy-btn {
+      margin-top: 12px;
+      padding: 10px 18px;
+      background: #00ff88;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: #00bfff;
+      transform: translateY(-2px);
+    }
+
+    .key-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .key-links a {
+      text-decoration: none;
+      text-align: center;
+      padding: 14px;
+      border-radius: 10px;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .linkvertise {
+      background: #1a1a1a;
+      color: #00ff88;
+      border: 1px solid #00ff88;
+    }
+
+    .linkvertise:hover {
+      background: #00ff88;
+      color: #000;
+    }
+
+    .workink {
+      background: #1a1a1a;
+      color: #00bfff;
+      border: 1px solid #00bfff;
+    }
+
+    .workink:hover {
+      background: #00bfff;
+      color: #000;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #777;
+      font-size: 0.9rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Anti V4 Loader</h1>
+    <p>Copy the loader & choose your key method</p>
+  </header>
+
+  <div class="container">
+
+    <div class="card">
+      <h2>Loader Script</h2>
+      <code id="loader-code">loadstring(game:HttpGet('https://raw.githubusercontent.com/Flanchyowo/AV3/refs/heads/main/AV3LOADER'))()</code>
+      <button class="copy-btn" onclick="copyCode()">📋 Copy Loader</button>
+    </div>
+
+    <div class="card">
+      <h2>Get Your Key</h2>
+      <div class="key-links">
+        <a class="linkvertise" href="https://ads.luarmor.net/get_key?for=ANTIV3OFFICIALKEY-aUumdqeyFsoO" target="_blank">
+          🔑 Linkvertise (1 Step)
+        </a>
+        <a class="workink" href="https://ads.luarmor.net/get_key?for=AV3WORKINK-TqTWNALiDQKt" target="_blank">
+          🔑 Workink (3 Steps)
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    © 2025 Anti V4 | Loader Hub
+  </footer>
+
+  <script>
+    function copyCode() {
+      const code = document.getElementById("loader-code").innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        alert("✅ Loader copied to clipboard!");
+      }).catch(() => {
+        alert("❌ Failed to copy, please copy manually.");
+      });
+    }
+  </script>
+</body>
+</html>    code {
       display: block;
       padding: 15px;
       background: #000;
