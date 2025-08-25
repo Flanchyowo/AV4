@@ -1,0 +1,61 @@
+
+return {
+    Sections = {
+        {
+            Name = "General",
+            Side = "Left",
+            Labels = {
+                "Welcome to the Test Extension!",
+                "This section has labels."
+            },
+            Buttons = {
+                { Name = "Click Me", Callback = function()
+                    print("Button Clicked!")
+                    game:GetService("Players").LocalPlayer:Kick("Test Extension Button Clicked!")
+                end }
+            },
+            Toggles = {
+                { Name = "Enable Feature", Default = true, Callback = function(value)
+                    print("Toggle is now:", value)
+                end }
+            },
+            Dropdowns = {
+                { Name = "Select Option", Options = {"One","Two","Three"}, Default = "One", Callback = function(value)
+                    print("Dropdown selected:", value)
+                end }
+            },
+            Sliders = {
+                { Name = "Volume", Default = 50, Minimum = 0, Maximum = 100, Precision = 1, Suffix = "%", Callback = function(value)
+                    print("Slider value:", value)
+                end }
+            }
+        },
+        {
+            Name = "Advanced",
+            Side = "Right",
+            Labels = {
+                "Advanced Section Label"
+            },
+            Buttons = {
+                { Name = "Do Something", Callback = function()
+                    print("Advanced button pressed")
+                end }
+            },
+            Toggles = {
+                { Name = "Advanced Toggle", Default = false, Callback = function(value)
+                    print("Advanced toggle:", value)
+                end }
+            },
+            Dropdowns = {
+                { Name = "Mode", Options = {"Easy","Medium","Hard"}, Default = "Medium", Callback = function(value)
+                    print("Mode selected:", value)
+                end }
+            },
+            Sliders = {
+                { Name = "Speed", Default = 10, Minimum = 1, Maximum = 20, Precision = 1, Suffix = "x", Callback = function(value)
+                    print("Speed set to:", value)
+                end }
+            }
+        }
+    }
+}
