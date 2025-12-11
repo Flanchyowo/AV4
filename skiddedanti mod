@@ -1,0 +1,89 @@
+
+if _G.staffCheckerEnabled == nil then
+    _G.staffCheckerEnabled = false  
+end
+
+_G.staffCheckerEnabled = not _G.staffCheckerEnabled
+
+ Players = game:GetService("Players")
+
+ staffKeywords = {"ADMIN", "Owner", "Devs", "Contributed", "Monetization", "Moderators"} 
+ staffGroupId = 4698921
+
+ minStaffRank = 2 
+
+-- State
+ connections = {} -- Holds event
+
+
+
+ function sendNotification(title, message, duration)
+    game.StarterGui:SetCore("SendNotification", {
+        Title = title;
+        Text = message;
+        Duration = duration or 5; 
+    })
+end
+
+
+local function checkForStaff(player)
+    if not _G.staffCheckerEnabled then return end 
+
+    for _, keyword in ipairs(staffKeywords) do
+        if string.match(string.lower(player.Name), "^" .. string.lower(keyword) .. "$") then
+            local message = player.Name .. " is a staff member!"
+            print("[STAFF DETECTED] Username match: " .. message)
+            sendNotification("Staff Checker", message)
+            return true
+        end
+    end
+    local success, isInGroup = pcall(function()
+        return player:IsInGroup(staffGroupId)
+    end)
+    
+    if success and isInGroup then
+        local rank = player:GetRankInGroup(staffGroupId)
+        
+        if rank >= minStaffRank then
+            local message = player.Name .. " is a staff member! Rank: " .. player:GetRoleInGroup(staffGroupId)
+            print("[STAFF DETECTED] Group match: " .. message)
+            sendNotification("Staff Checker", message)
+            return true
+        end
+    end
+
+    return false
+end
+
+-- Function to enable staff checker
+ function enableStaffChecker()
+    -- Connect player added event
+    table.insert(connections, Players.PlayerAdded:Connect(function(player)
+        checkForStaff(player)
+    end))
+
+    -- Check current players in the game
+    for _, player in ipairs(Players:GetPlayers()) do
+        checkForStaff(player)
+    end
+end
+
+-- Function to disable staff checker
+
+ function disableStaffChecker()
+    -- Disconnect all stored connections
+    for _, connection in ipairs(connections) do
+        connection:Disconnect()
+    end
+    connections = {}
+end
+
+if _G.staffCheckerEnabled then
+    
+    game.StarterGui:SetCore("SendNotification", {Title="Staff Checker Loaded"; Text=""; Duration=5;})
+    enableStaffChecker()
+else
+    
+    game.StarterGui:SetCore("SendNotification", {Title="Staff Checker Unloaded"; Text=""; Duration=5;})
+    disableStaffChecker()
+end
