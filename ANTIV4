@@ -1,1 +1,1 @@
-game.Players.LocalPlayer:Kick("Script is down for now")
+loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/4650262463c95d5d3c5e8aa68cb5977d.lua"))()
