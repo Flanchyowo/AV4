@@ -18792,8 +18792,8 @@ pcall(function()
 end)
 
 local win = lib:Window({
-    name = 'Anti v4 X Symbol',
-    size = UDim2.fromOffset(750, 599),
+    name = 'AV4 X Symbol',
+    size = UDim2.fromOffset(600, 599),
     open = true,
     fontsize = 20,
 })
