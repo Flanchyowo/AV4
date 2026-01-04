@@ -18792,7 +18792,7 @@ pcall(function()
 end)
 
 local win = lib:Window({
-    name = 'symbol',
+    name = 'Anti v4 X Symbol',
     size = UDim2.fromOffset(750, 599),
     open = true,
     fontsize = 20,
@@ -24071,7 +24071,7 @@ pcall(function()
 end)
 lib.Notification({
     name = '32jew',
-    description = 'anti v4 better btw',
+    description = 'hello, symbol is loaded',
     type = 'Time',
     time = 5,
 })
