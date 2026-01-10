@@ -1,1 +1,12 @@
 loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/cb9d49515961cb08d19ed0db5036ae46.lua"))()
+
+local executor = identifyexecutor and identifyexecutor():lower() or ""
+local fuckingassexecutor = executor:find("xeno") or executor:find("solara") or executor:find("jjsploit") or executor:find("Hydrogen")
+
+
+if fuckingassexecutor then
+    game.Players.LocalPlayer:Kick("UNSUPPORTED EXECUTOR " .. executor .. " WONT WORK WITH ANTI V4")
+    return
+else 
+    print(executor)
+end
